@@ -1,7 +1,7 @@
 {
     "name": "expo-stripe-gl",
     "description": "A version of the Stripe homepage animated gradient that works on Expo",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "scripts": {
         "start": "expo start",
         "android": "expo start --android",
