@@ -29,6 +29,33 @@ export function normalizeColor(
     ];
 }
 
+export interface GradientConfig {
+    /** The colors on the gradient. Length must stay constant. */
+    colors: ([number, number, number] | string | number)[];
+    /** Whether a color is active on the gradient. Same length as `colors` */
+    activeColors: boolean[];
+    /** Whether the gradient is in wireframe mode so outlines are shown
+     *  instead of colours. */
+    wireframe: boolean;
+    /** The vertices-per-pixel along the x and y.
+     *
+     *  To change after init, call `resize`.
+     */
+    density: [number, number];
+    /** The speed the animation moves at. */
+    speed: number;
+    /** The angle of the gradient, in radians. */
+    angle: number;
+    /** The amplitude of the peaks. */
+    amp: number;
+    /** The random noise seed. */
+    seed: number;
+    /** The frequency of peaks along the X-axis */
+    freqX: number;
+    /** The frequency of peaks along the Y-axis */
+    freqY: number;
+}
+
 /**
  *  ```
  *  const [gradient, setGradient] = useState<Gradient | null>(null);
@@ -87,36 +114,11 @@ export class Gradient {
     // This value is not allowed to change.
     readonly colorCount: number;
 
-    conf: {
-        /** The colors on the gradient. Length must stay constant. */
-        colors: ([number, number, number] | string | number)[];
-        /** Whether a color is active on the gradient. Same length as `colors` */
-        activeColors: boolean[];
-        /** Whether the gradient is in wireframe mode so outlines are shown
-         *  instead of colours. */
-        wireframe: boolean;
-        /** The vertices-per-pixel along the x and y.
-         *
-         *  To change after init, call `resize`.
-         */
-        density: [number, number];
-        /** The speed the animation moves at. */
-        speed: number;
-        /** The angle of the gradient, in radians. */
-        angle: number;
-        /** The amplitude of the peaks. */
-        amp: number;
-        /** The random noise seed. */
-        seed: number;
-        /** The frequency of peaks along the X-axis */
-        freqX: number;
-        /** The frequency of peaks along the Y-axis */
-        freqY: number;
-    };
+    conf: GradientConfig;
 
     constructor(
         gl: ExpoWebGLRenderingContext,
-        conf: Partial<typeof Gradient.prototype.conf> = {}
+        conf: Partial<GradientConfig> = {}
     ) {
         this.shaderFiles = {
             vertex: VERTEX_FILE,

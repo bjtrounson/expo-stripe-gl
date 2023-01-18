@@ -1,7 +1,6 @@
-import { ExpoWebGLRenderingContext, GLView } from "expo-gl";
 import { useState } from "react";
 import { Pressable, View, Text } from "react-native";
-import { Gradient } from "./gradient";
+import GLGradient, { Gradient } from "./index";
 
 export default function App() {
     const [key, setKey] = useState(0);
@@ -14,27 +13,26 @@ export default function App() {
 
     return (
         <>
-            <GLView
+            <GLGradient
                 key={key}
                 style={{
                     position: "absolute",
                     top: 0,
                     left: 0,
                     right: 0,
-                    bottom: 0
+                    bottom: 0,
+                    zIndex: -10
                 }}
-                onContextCreate={(gl: ExpoWebGLRenderingContext) => {
-                    let g = new Gradient(gl, {
-                        freqX: 14e-5
-                    });
-                    gl.clearColor(1, 1, 1, 1);
-                    setGradient(g);
-                }}
+                config={
+                    {
+                        // Custom config here!
+                    }
+                }
+                getGradient={setGradient}
             />
-
             <View
                 key={statKey}
-                className="mt-20 rounded-lg bg-white/30 self-center items-center justify-center px-4 py-2"
+                className="bg-white/30 mt-20 rounded-lg self-center items-center justify-center px-4 py-2 z-10"
             >
                 <Pressable
                     className="active:bg-white/30 rounded-lg px-2 py-1"

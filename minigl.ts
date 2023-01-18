@@ -376,7 +376,7 @@ export class Uniform {
     }
 }
 
-type Orientation = "xy" | "xz" | "yx" | "yz" | "zx" | "zy";
+export type Orientation = "xy" | "xz" | "yx" | "yz" | "zx" | "zy";
 export class PlaneGeometry {
     miniGl: MiniGl;
     attributes: Record<string, Attribute>;
@@ -572,7 +572,7 @@ export class Mesh {
     }
 }
 
-interface AttributeOptions {
+export interface AttributeOptions {
     target: number;
     size: number;
     type?: number;
