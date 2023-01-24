@@ -8,7 +8,10 @@ export default function App() {
     const [statKey, setStatKey] = useState(-1);
     const updateConfig = () => {
         setStatKey(statKey - 1);
-        if (gradient) gradient.updateConfig();
+        if (gradient) {
+            gradient.updateConfig();
+            gradient.minigl.render();
+        }
     };
 
     return (
@@ -69,17 +72,127 @@ export default function App() {
                     <Pressable
                         onPress={() => {
                             if (!gradient) return;
-                            gradient.conf.amp = gradient.conf.amp + 10;
+                            gradient.conf.noiseFloor =
+                                gradient.conf.noiseFloor + 0.1;
                             updateConfig();
                         }}
                     >
                         <Text>INC</Text>
                     </Pressable>
-                    <Text className="mx-2">Amp: {gradient?.conf.amp}</Text>
+                    <Text className="mx-2">
+                        Floor: {gradient?.conf.noiseFloor.toFixed(1)}
+                    </Text>
                     <Pressable
                         onPress={() => {
                             if (!gradient) return;
-                            gradient.conf.amp = gradient.conf.amp - 10;
+                            gradient.conf.noiseFloor =
+                                gradient.conf.noiseFloor - 0.1;
+                            updateConfig();
+                        }}
+                    >
+                        <Text>DEC</Text>
+                    </Pressable>
+                </View>
+
+                <View className="flex-row items-center active:bg-white/30 rounded-lg px-2 py-1">
+                    <Pressable
+                        onPress={() => {
+                            if (!gradient) return;
+                            gradient.conf.blendDistance =
+                                gradient.conf.blendDistance + 0.5;
+                            updateConfig();
+                        }}
+                    >
+                        <Text>INC</Text>
+                    </Pressable>
+                    <Text className="mx-2">
+                        Bleed: {gradient?.conf.blendDistance}
+                    </Text>
+                    <Pressable
+                        onPress={() => {
+                            if (!gradient) return;
+                            gradient.conf.blendDistance =
+                                gradient.conf.blendDistance - 0.5;
+                            updateConfig();
+                        }}
+                    >
+                        <Text>DEC</Text>
+                    </Pressable>
+                </View>
+
+                <View className="flex-row items-center active:bg-white/30 rounded-lg px-2 py-1">
+                    <Pressable
+                        onPress={() => {
+                            if (!gradient) return;
+                            gradient.conf.scale[0] =
+                                gradient.conf.scale[0] + 10;
+                            gradient.resize();
+                            updateConfig();
+                        }}
+                    >
+                        <Text>INC</Text>
+                    </Pressable>
+                    <Text className="mx-2">
+                        X-Scale: {gradient?.conf.scale[0]}
+                    </Text>
+                    <Pressable
+                        onPress={() => {
+                            if (!gradient) return;
+                            gradient.conf.scale[0] =
+                                gradient.conf.scale[0] - 10;
+                            gradient.resize();
+                            updateConfig();
+                        }}
+                    >
+                        <Text>DEC</Text>
+                    </Pressable>
+                </View>
+                <View className="flex-row items-center active:bg-white/30 rounded-lg px-2 py-1">
+                    <Pressable
+                        onPress={() => {
+                            if (!gradient) return;
+                            gradient.conf.scale[1] =
+                                gradient.conf.scale[1] + 10;
+                            gradient.resize();
+                            updateConfig();
+                        }}
+                    >
+                        <Text>INC</Text>
+                    </Pressable>
+                    <Text className="mx-2">
+                        Y-Scale: {gradient?.conf.scale[1]}
+                    </Text>
+                    <Pressable
+                        onPress={() => {
+                            if (!gradient) return;
+                            gradient.conf.scale[1] =
+                                gradient.conf.scale[1] - 10;
+                            gradient.resize();
+                            updateConfig();
+                        }}
+                    >
+                        <Text>DEC</Text>
+                    </Pressable>
+                </View>
+                <View className="flex-row items-center active:bg-white/30 rounded-lg px-2 py-1">
+                    <Pressable
+                        onPress={() => {
+                            if (!gradient) return;
+                            gradient.conf.scale[2] =
+                                gradient.conf.scale[2] + 10;
+                            updateConfig();
+                        }}
+                    >
+                        <Text>INC</Text>
+                    </Pressable>
+                    <Text className="mx-2">
+                        Z-scale: {gradient?.conf.scale[2]}
+                    </Text>
+                    <Pressable
+                        onPress={() => {
+                            if (!gradient) return;
+                            gradient.conf.scale[2] =
+                                gradient.conf.scale[2] - 10;
                             updateConfig();
                         }}
                     >

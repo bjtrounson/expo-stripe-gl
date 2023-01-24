@@ -312,19 +312,21 @@ void main() {
     //
 
     float noise = snoise(vec3(
-            noiseCoord.x * u_vertDeform.noiseFreq.x + time * u_vertDeform.noiseFlow,
+        noiseCoord.x * u_vertDeform.noiseFreq.x + time * u_vertDeform.noiseFlow,
         noiseCoord.y * u_vertDeform.noiseFreq.y,
         time * u_vertDeform.noiseSpeed + u_vertDeform.noiseSeed
     )) * u_vertDeform.noiseAmp;
 
     // Fade noise to zero at edges
-    noise *= 1.0 - pow(abs(uvNorm.y), 2.0);
+    if (u_vertDeform.noiseFadeEdges != 0.) {
+        noise *= 1.0 - pow(abs(uvNorm.y), u_vertDeform.noiseFadeEdges);
+    }
 
     // Clamp to 0
-    noise = max(0.0, noise);
+    noise = max(u_vertDeform.noiseFloor, noise);
 
     vec3 pos = vec3(
-            position.x,
+        position.x,
         position.y + tilt + incline + noise - offset,
         position.z
     );
@@ -334,24 +336,24 @@ void main() {
     //
 
     if (u_active_colors[0] == 1.) {
-            v_color = u_baseColor;
+        v_color = u_baseColor;
     }
 
     for (int i = 0; i < u_waveLayers_length; i++) {
-            if (u_active_colors[i + 1] == 1.) {
+        if (u_active_colors[i + 1] == 1.) {
             WaveLayers layer = u_waveLayers[i];
 
-        float noise = smoothstep(
+            float noise = smoothstep(
                 layer.noiseFloor,
-            layer.noiseCeil,
-            snoise(vec3(
-                noiseCoord.x * layer.noiseFreq.x + time * layer.noiseFlow,
-            noiseCoord.y * layer.noiseFreq.y,
-            time * layer.noiseSpeed + layer.noiseSeed
-            )) / 2.0 + 0.5
-        );
+                layer.noiseCeil,
+                snoise(vec3(
+                    noiseCoord.x * layer.noiseFreq.x + time * layer.noiseFlow,
+                    noiseCoord.y * layer.noiseFreq.y,
+                    time * layer.noiseSpeed + layer.noiseSeed
+                )) / 2.0 + 0.5
+            );
 
-        v_color = blendNormal(v_color, layer.color, pow(noise, 4.));
+            v_color = blendNormal(v_color, layer.color, pow(noise, u_blend_distance));
         }
     }
 
@@ -370,7 +372,15 @@ void main() {
     vec3 color = v_color;
     if (u_darken_top == 1.0) {
         vec2 st = gl_FragCoord.xy/resolution.xy;
-        color.g -= pow(st.y + sin(-12.0) * st.x, u_shadow_power) * 0.4;
+        if (u_shadow_power.r != -1.0) {
+            color.r -= pow(st.y + sin(-12.0) * st.x, u_shadow_power.r) * 0.4;
+        }
+        if (u_shadow_power.g != -1.0) {
+            color.g -= pow(st.y + sin(-12.0) * st.x, u_shadow_power.g) * 0.4;
+        }
+        if (u_shadow_power.b != -1.0) {
+            color.b -= pow(st.y + sin(-12.0) * st.x, u_shadow_power.b) * 0.4;
+        }
     }
     gl_FragColor = vec4(color, 1.0);
 }

@@ -46,14 +46,33 @@ export interface GradientConfig {
     speed: number;
     /** The angle of the gradient, in radians. */
     angle: number;
-    /** The amplitude of the peaks. */
-    amp: number;
     /** The random noise seed. */
     seed: number;
-    /** The frequency of peaks along the X-axis */
-    freqX: number;
-    /** The frequency of peaks along the Y-axis */
-    freqY: number;
+    /** The scale of the X, Y, and Z-axis.
+     *
+     * The Z-axis is also the the amplitude of the peaks. As scaleX and scaleY
+     * increase, this should decrease.
+     */
+    scale: [number, number, number];
+    /** Whether to enable the shadow at the top-right of the screen. */
+    darkenTop: boolean;
+    /** The amount the shadow affects each color channel. `-1` to disable for a chennel. */
+    shadowPower: [number, number, number];
+    /** The scaling factor to apply to the noise, as it approaches the edges.
+     *
+     * `1 - abs(x)^noiseFadeEdges` is applied to the noise value, where `x` is
+     *  the distance of the point from the top/bottom edge, in the range [-1, 1].
+     *
+     *  Set to `0` to disable.
+     */
+    noiseFadeEdges: number;
+    /** The floor of the gradient. Should be in the range `[-1, 1]`.
+     *
+     * Any values above 0 will cause issues at the bottom of the screen.
+     */
+    noiseFloor: number;
+    /** How much the colours bleed into each other. */
+    blendDistance: number;
 }
 
 /**
@@ -134,10 +153,13 @@ export class Gradient {
             density: [0.06, 0.16],
             speed: 1,
             angle: 0,
-            amp: 320,
             seed: 5,
-            freqX: 14e-5,
-            freqY: 29e-5,
+            darkenTop: true,
+            shadowPower: [-1, gl.drawingBufferWidth < 600 ? 5 : 6, -1],
+            noiseFadeEdges: 2,
+            noiseFloor: 0,
+            blendDistance: 4,
+            scale: [140, 290, 320],
             ...conf
         };
 
@@ -167,8 +189,6 @@ export class Gradient {
         if (this.mesh) {
             this.mesh.geometry.setTopology(this.xSegCount, this.ySegCount);
             this.mesh.geometry.setSize(this.width, this.height);
-            this.mesh.material.uniforms.u_shadow_power.value =
-                this.width < 600 ? 5 : 6;
         }
     }
 
@@ -203,15 +223,15 @@ export class Gradient {
 
         // Update all the conf fields
         this.mesh.wireframe = this.conf.wireframe;
-        this.modifyUniform("u_shadow_power", 5);
-        this.modifyUniform("u_darken_top", 1);
+        this.modifyUniform("u_shadow_power", this.conf.shadowPower);
+        this.modifyUniform("u_darken_top", this.conf.darkenTop ? 1 : 0);
         this.modifyUniform(
             "u_active_colors",
             this.conf.activeColors.map((c) => (c ? 1 : 0))
         );
         this.modifyUniform("u_global.noiseFreq", [
-            this.conf.freqX,
-            this.conf.freqY
+            this.conf.scale[0] / 1e6,
+            this.conf.scale[1] / 1e6
         ]);
         this.modifyUniform("u_global.noiseSpeed", 5e-6);
         this.modifyUniform(
@@ -221,10 +241,19 @@ export class Gradient {
         this.modifyUniform("u_vertDeform.offsetTop", -0.5);
         this.modifyUniform("u_vertDeform.offsetBottom", -0.5);
         this.modifyUniform("u_vertDeform.noiseFreq", [3, 4]);
-        this.modifyUniform("u_vertDeform.noiseAmp", this.conf.amp);
+        this.modifyUniform("u_vertDeform.noiseAmp", this.conf.scale[2]);
         this.modifyUniform("u_vertDeform.noiseSpeed", 10);
         this.modifyUniform("u_vertDeform.noiseFlow", 3);
         this.modifyUniform("u_vertDeform.noiseSeed", this.conf.seed);
+        this.modifyUniform(
+            "u_vertDeform.noiseFadeEdges",
+            this.conf.noiseFadeEdges
+        );
+        this.modifyUniform(
+            "u_vertDeform.noiseFloor",
+            this.conf.noiseFloor * this.conf.scale[2]
+        );
+        this.modifyUniform("u_blend_distance", this.conf.blendDistance);
 
         let colorsAsVec3 = this.colorsAsVec3();
         this.modifyUniform("u_baseColor", colorsAsVec3[0]);
@@ -322,19 +351,26 @@ export class Gradient {
                 value: 0
             }),
             u_shadow_power: new Uniform(this.minigl, {
-                value: 5
+                type: "vec3",
+                value: this.conf.shadowPower
             }),
             u_darken_top: new Uniform(this.minigl, {
-                value: true ? 1 : 0
+                value: this.conf.darkenTop ? 1 : 0
             }),
             u_active_colors: new Uniform(this.minigl, {
                 value: this.conf.activeColors.map((c) => (c ? 1 : 0)),
                 type: "vec4"
             }),
+            u_blend_distance: new Uniform(this.minigl, {
+                value: this.conf.blendDistance
+            }),
             u_global: new Uniform(this.minigl, {
                 value: {
                     noiseFreq: new Uniform(this.minigl, {
-                        value: [this.conf.freqX, this.conf.freqY],
+                        value: [
+                            this.conf.scale[0] / 1e6,
+                            this.conf.scale[1] / 1e6
+                        ],
                         type: "vec2"
                     }),
                     noiseSpeed: new Uniform(this.minigl, {
@@ -361,7 +397,7 @@ export class Gradient {
                         type: "vec2"
                     }),
                     noiseAmp: new Uniform(this.minigl, {
-                        value: this.conf.amp
+                        value: this.conf.scale[2]
                     }),
                     noiseSpeed: new Uniform(this.minigl, {
                         value: 10
@@ -371,6 +407,12 @@ export class Gradient {
                     }),
                     noiseSeed: new Uniform(this.minigl, {
                         value: this.conf.seed
+                    }),
+                    noiseFadeEdges: new Uniform(this.minigl, {
+                        value: this.conf.noiseFadeEdges
+                    }),
+                    noiseFloor: new Uniform(this.minigl, {
+                        value: this.conf.noiseFloor * this.conf.scale[2]
                     })
                 },
                 type: "struct",
