@@ -1,24 +1,18 @@
 {
-    "name": "expo-stripe-gl",
-    "description": "A version of the Stripe homepage animated gradient that works on Expo",
-    "version": "2.1.0",
-    "scripts": {
-        "start": "expo start",
-        "android": "expo start --android",
-        "ios": "expo start --ios",
-        "web": "expo start --web"
-    },
-    "dependencies": {
-        "expo": "~48.0.9",
-        "expo-gl": "~12.4.0",
-        "react": "18.2.0",
-        "react-dom": "18.1.0",
-        "react-native": "0.71.4"
-    },
-    "devDependencies": {
-        "@babel/core": "^7.21.3",
-        "nativewind": "^2.0.11",
-        "tailwindcss": "^3.2.4",
-        "typescript": "^5.0.2"
-    }
+  "name": "expo-stripe-gl",
+  "description": "A version of the Stripe homepage animated gradient that works on Expo",
+  "version": "2.2.0",
+  "main": "index.ts",
+  "dependencies": {
+    "expo": "~48.0.10",
+    "expo-gl": "~12.4.0",
+    "react": "18.2.0",
+    "react-native": "0.71.6"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.21.3",
+    "typescript": "^5.0.2",
+    "@types/react": "~18.0.27",
+    "@types/react-native": "^0.71.5"
+  }
 }

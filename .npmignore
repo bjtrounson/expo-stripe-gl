@@ -1,7 +1,4 @@
-/node_modules
-/android
-/ios
-/.idea
+examples/
 ### ReactNative template
 # React Native Stack Base
 
