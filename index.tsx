@@ -1,5 +1,5 @@
 import { ExpoWebGLRenderingContext, GLView, GLViewProps } from "expo-gl";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Gradient, GradientConfig } from "./gradient";
 
 export { Gradient, GradientConfig } from "./gradient";
